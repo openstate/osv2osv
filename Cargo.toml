@@ -2,9 +2,18 @@
 name = "osv2osv"
 version = "0.1.0"
 authors = ["Benjamin W. Broersma <bw@broersma.com>"]
-edition = "2018"
+
+description = "Converting OSV csv back to (byte identical) EML_NL"
+readme = "README.md"
+keywords = ["osv", "eml", "eml-nl", "csv"]
+
+repository = "https://github.com/openstate/osv2osv"
+documentation = "https://github.com/openstate/osv2osv"
+
+license = "CC-0"
 
 [dependencies]
+chrono = "0.4"
 csv = "1"
 regex = "1"
 xml-rs = "0.8"

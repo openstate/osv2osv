@@ -16,6 +16,10 @@ sed 's/20T12:34:56.789/21T06:57:22.834/' generated.eml.xml | sha256sum
 ## Note
 Would have loved to have used `serde-xml-rs` but since there is no attribute serialization ([issue #49](https://github.com/RReverser/serde-xml-rs/issues/49)) it's not yet usable for this project.
 
+## License
+
+[CC-0](https://creativecommons.org/publicdomain/zero/1.0/)
+
 ## Future
 - convert EML to OSV csv (will need candidates eml for this)
 - supprort other elections that AB/PS 2019
