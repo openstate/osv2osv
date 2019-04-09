@@ -1,0 +1,10 @@
+[package]
+name = "csv2eml"
+version = "0.1.0"
+authors = ["Benjamin W. Broersma <bw@broersma.com>"]
+edition = "2018"
+
+[dependencies]
+csv = "1"
+regex = "1"
+xml-rs = "0.8"
