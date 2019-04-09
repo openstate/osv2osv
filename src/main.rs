@@ -364,11 +364,12 @@ mod tests {
     use std::fs;
     use std::fs::File;
 
-    fn test_osv(ps_csv_file: &str, ps_eml_file: &str, correct_ts: &str) {
+    fn test_osv(csv_file: &str, eml_file: &str, correct_ts: &str) {
         let default_ts = "20T12:34:56.789";
+        let csv_rdr = Box::new(File::open(csv_file).expect("Could not read csv file")) as Box<Read>;
         assert_eq!(
-            data2eml(csv2data(Box::new(File::open(ps_csv_file).expect("Could not read csv file")) as Box<Read>)).replace(default_ts, correct_ts),
-            fs::read_to_string(ps_eml_file).expect("Could not read eml file"));
+            data2eml(csv2data(csv_rdr)).replace(default_ts, correct_ts),
+            fs::read_to_string(eml_file).expect("Could not read eml file"));
     }
 
     #[test]

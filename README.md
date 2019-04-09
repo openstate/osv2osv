@@ -19,4 +19,4 @@ Would have loved to have used `serde-xml-rs` but since there is no attribute ser
 ## Future
 - convert EML to OSV csv (will need candidates eml for this)
 - supprort other elections that AB/PS 2019
-- brute force search the `kr:CreationDateTime` and IVU program/version based on a SHA256 hash input (in the N11 footer)
+- brute force search the `kr:CreationDateTime` and IVU program/version based on a SHA256 hash input (from the N11 footer)
