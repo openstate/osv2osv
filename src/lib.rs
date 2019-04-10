@@ -75,6 +75,8 @@ pub struct OsvInternalData {
     election_domain: String, // e.g. "Fryslân"
     election_identifier_id: String, // e.g. "PS2019_Fryslan"
     creation_date_time: String,// YYYY-MM-DDTHH:mm:ss.iii format
+    contest_id: String,// geen | election district id (kieskring)
+    contest_name: String,// "" | election district name (kieskring)
     naam: Vec<String>,
     gebiednummer: Vec<String>,
     postcode: Vec<String>,
@@ -151,7 +153,13 @@ pub fn data2eml (data: OsvInternalData) -> String {
 
                         w.write(XmlEvent::start_element("Contest")).unwrap();
 
-                            write_str_att!(w, "ContestIdentifier", "Id", "geen", "");
+                            w.write(XmlEvent::start_element("ContestIdentifier").attr("Id", &data.contest_id)).unwrap();
+                            if data.contest_name.len() == 0 {
+                                w.write("").unwrap();
+                            } else {
+                                write_str!(w, "ContestName", data.contest_name);
+                            }
+                            w.write(XmlEvent::end_element()).unwrap(); //ContestIdentifier
 
                             for sb in 0..data.kandidaatstemmen.len() {
                                 if sb == 0 {
@@ -225,6 +233,8 @@ pub fn csv2data(r: Box<Read>) -> OsvInternalData {
         election_domain: "".to_string(),
         election_identifier_id: "".to_string(),
         creation_date_time: "".to_string(),
+        contest_id: "geen".to_string(),
+        contest_name: "".to_string(),
         naam: vec![],
         gebiednummer: vec![],
         postcode: vec![],
@@ -285,17 +295,20 @@ pub fn csv2data(r: Box<Read>) -> OsvInternalData {
     if data.election_identifier_name.len() > 19 && &data.election_identifier_name[..19] == "Provinciale Staten " {
         data.election_category = "PS".to_string();
         data.election_domain = data.election_identifier_name[19..data.election_identifier_name.len()-5].to_string();
-        data.election_subcategory = { if
-            data.election_domain == "Gelderland" ||
-            data.election_domain == "Noord-Holland" ||
-            data.election_domain == "Zuid-Holland" ||
-            data.election_domain == "Noord-Brabant" ||
-            data.election_domain == "Limburg" {
+        data.election_subcategory = {
+            if data.election_domain == "Gelderland" ||
+                    data.election_domain == "Noord-Holland" ||
+                    data.election_domain == "Zuid-Holland" ||
+                    data.election_domain == "Noord-Brabant" ||
+                    data.election_domain == "Limburg" {
                 "PS2".to_string() // Provincie got 2 election districts (kieskringen)
             } else {
                 "PS1".to_string() // Provincie with just 1 election district (kieskring)
             }
         };
+        if &data.election_subcategory == "PS2" {
+            panic!("not yet implemented content id fetch (xpath from verkiezingsdefinitie)");
+        }
     } else if data.election_identifier_name.len() > 25 && &data.election_identifier_name[..25] == "Algemeen bestuur van het " {
         let offset = {
             if data.election_identifier_name.len() > 36 && &data.election_identifier_name[25..36] == "waterschap " {
@@ -308,11 +321,11 @@ pub fn csv2data(r: Box<Read>) -> OsvInternalData {
         };
         data.election_category = "AB".to_string();
         data.election_domain = data.election_identifier_name[offset..data.election_identifier_name.len()-5].to_string();
-        data.election_subcategory = { if
-            data.election_domain == "Noorderzijlvest" ||
-            data.election_domain == "Fryslân" ||
-            data.election_domain == "Hunze en Aa's" ||
-            data.election_domain == "Zuiderzeeland" {
+        data.election_subcategory = {
+            if data.election_domain == "Noorderzijlvest" ||
+                    data.election_domain == "Fryslân" ||
+                    data.election_domain == "Hunze en Aa's" ||
+                    data.election_domain == "Zuiderzeeland" {
                 "AB1".to_string() // Small water board council (less than 19 seats)
             } else {
                 "AB2".to_string() // Large water board council
