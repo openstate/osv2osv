@@ -1,6 +1,6 @@
 [package]
 name = "osv2osv"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Benjamin W. Broersma <bw@broersma.com>"]
 
 description = "Converting OSV csv back to (byte identical) EML_NL"
@@ -16,4 +16,6 @@ license = "CC-0"
 chrono = "0.4"
 csv = "1"
 regex = "1"
+rust-crypto = "0.2"
+structopt = "0.2"
 xml-rs = "0.8"
