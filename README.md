@@ -25,4 +25,7 @@ Would have loved to have used `serde-xml-rs` but since there is no attribute ser
 
 ## Future
 - convert EML to OSV csv (will need candidates eml for this)
-- support other elections that AB/PS/EP 2019
+- support other elections than AB/PS/EP 2019, namely EK/NR/GR/TK.
+- maybe recover lost EML files (e.g. results, count, candidates or definition) based on other files / internal state.
+
+For conversion of EML to JSON, see [our allmanak](https://github.com/search?q=repo:openstate/allmanak+filename:eml+language:XSLT) project.
