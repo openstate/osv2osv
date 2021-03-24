@@ -124,6 +124,7 @@ pub struct Count {
     geldig_volmachtbewijs: u32,
     geldige_kiezerspas: u32,
     toegelaten_kiezers: u32,
+    toegelaten_kiezers_briefstembureaus_gemeente: u32,
     geldige_stembiljetten: u32,
     blanco_stembiljetten: u32,
     ongeldige_stembiljetten: u32,
@@ -133,6 +134,8 @@ pub struct Count {
     kiezers_met_stembiljet_hebben_niet_gestemd: u32,
     er_zijn_te_weinig_stembiljetten_uitgereikt: u32,
     er_zijn_te_veel_stembiljetten_uitgereikt: u32,
+    geen_stembiljet_in_enveloppe_briefstembureaus: u32,
+    meer_stembiljetten_in_een_enveloppe_briefstembureaus: u32,
     geen_verklaring: u32,
     andere_verklaring: u32,
     votes: Vec<Vec<u32>>
@@ -220,15 +223,15 @@ pub fn contest2eml (contest: &Contest) -> String {
             .default_ns("urn:oasis:names:tc:evs:schema:eml")
             .ns("ds", "http://www.w3.org/2000/09/xmldsig#")
             .ns("kr", "http://www.kiesraad.nl/extensions")
-            .ns("rg", "http://www.kiesraad.nl/reportgenerator")
+            //.ns("rg", "http://www.kiesraad.nl/reportgenerator")
             .ns("xal", "urn:oasis:names:tc:ciq:xsdschema:xAL:2.0")
             .ns("xnl", "urn:oasis:names:tc:ciq:xsdschema:xNL:2.0")
-            .ns("xsi", "http://www.w3.org/2001/XMLSchema-instance")
+            //.ns("xsi", "http://www.w3.org/2001/XMLSchema-instance")
             .attr("Id", "510b")
             .attr("SchemaVersion", "5")
-            .attr("xsi:schemaLocation", "urn:oasis:names:tc:evs:schema:eml 510-count-v5-0.xsd http://www.kiesraad.nl/extensions kiesraad-eml-extensions.xsd")
+            //.attr("xsi:schemaLocation", "urn:oasis:names:tc:evs:schema:eml 510-count-v5-0.xsd http://www.kiesraad.nl/extensions kiesraad-eml-extensions.xsd")
         ).unwrap();
-            w.write(XmlEvent::comment("Created by: Ondersteunende Software Verkiezingen by IVU Traffic Technologies AG, program: P4_PSB, version: 2.24.3")).unwrap();
+            //w.write(XmlEvent::comment("Created by: Ondersteunende Software Verkiezingen by IVU Traffic Technologies AG, program: P4_PSB, version: 2.24.3")).unwrap();
 
             write_str!(w, "TransactionId", "1");
 
@@ -324,11 +327,14 @@ fn write_count<W: Write>(w: &mut EventWriter<W>, lists: &Vec<List>, c: &Count) {
     write_reason!(w, "UncountedVotes", "geldige volmachtbewijzen", c.geldig_volmachtbewijs);
     write_reason!(w, "UncountedVotes", "geldige kiezerspassen", c.geldige_kiezerspas);
     write_reason!(w, "UncountedVotes", "toegelaten kiezers", c.toegelaten_kiezers);
+    write_reason!(w, "UncountedVotes", "toegelaten kiezers (Briefstembureaus gemeente)", c.toegelaten_kiezers_briefstembureaus_gemeente);
     write_reason!(w, "UncountedVotes", "meer getelde stembiljetten", c.meer_stembiljetten_dan_toegelaten_kiezers);
     write_reason!(w, "UncountedVotes", "minder getelde stembiljetten", c.minder_stembiljetten_dan_toegelaten_kiezers);
     write_reason!(w, "UncountedVotes", "meegenomen stembiljetten", c.kiezers_met_stembiljet_hebben_niet_gestemd);
     write_reason!(w, "UncountedVotes", "te weinig uitgereikte stembiljetten", c.er_zijn_te_weinig_stembiljetten_uitgereikt);
     write_reason!(w, "UncountedVotes", "te veel uitgereikte stembiljetten", c.er_zijn_te_veel_stembiljetten_uitgereikt);
+    write_reason!(w, "UncountedVotes", "geen stembiljet in enveloppe (Briefstembureaus)", c.geen_stembiljet_in_enveloppe_briefstembureaus);
+    write_reason!(w, "UncountedVotes", "meer stembiljetten in een enveloppe (Briefstembureaus)", c.meer_stembiljetten_in_een_enveloppe_briefstembureaus);
     write_reason!(w, "UncountedVotes", "geen verklaring", c.geen_verklaring);
     write_reason!(w, "UncountedVotes", "andere verklaring", c.andere_verklaring);
 }
@@ -353,6 +359,7 @@ pub fn csv2contest(r: Box<Read>) -> Contest {
             geldig_volmachtbewijs: 0,
             geldige_kiezerspas: 0,
             toegelaten_kiezers: 0,
+            toegelaten_kiezers_briefstembureaus_gemeente: 0,
             geldige_stembiljetten: 0,
             blanco_stembiljetten: 0,
             ongeldige_stembiljetten: 0,
@@ -362,6 +369,8 @@ pub fn csv2contest(r: Box<Read>) -> Contest {
             kiezers_met_stembiljet_hebben_niet_gestemd: 0,
             er_zijn_te_weinig_stembiljetten_uitgereikt: 0,
             er_zijn_te_veel_stembiljetten_uitgereikt: 0,
+            geen_stembiljet_in_enveloppe_briefstembureaus: 0,
+            meer_stembiljetten_in_een_enveloppe_briefstembureaus: 0,
             geen_verklaring: 0,
             andere_verklaring: 0,
             votes: vec![]
@@ -445,6 +454,10 @@ pub fn csv2contest(r: Box<Read>) -> Contest {
         contest.election_category = "EP".to_string();
         contest.election_subcategory = "EP".to_string();
         contest.contest_id = "alle".to_string();
+    } else if contest.election_identifier_name.len() > 30 && &contest.election_identifier_name[..33] == "Tweede Kamer der Staten-Generaal " {
+        contest.election_category = "TK".to_string();
+        contest.election_subcategory = "TK".to_string();
+        contest.contest_id = "TODO".to_string();
     } else {
         panic!("not yet implemented election domain");
     }
@@ -482,6 +495,7 @@ pub fn csv2contest(r: Box<Read>) -> Contest {
                     geldig_volmachtbewijs: 0,
                     geldige_kiezerspas: 0,
                     toegelaten_kiezers: 0,
+                    toegelaten_kiezers_briefstembureaus_gemeente: 0,
                     geldige_stembiljetten: 0,
                     blanco_stembiljetten: 0,
                     ongeldige_stembiljetten: 0,
@@ -491,6 +505,8 @@ pub fn csv2contest(r: Box<Read>) -> Contest {
                     kiezers_met_stembiljet_hebben_niet_gestemd: 0,
                     er_zijn_te_weinig_stembiljetten_uitgereikt: 0,
                     er_zijn_te_veel_stembiljetten_uitgereikt: 0,
+                    geen_stembiljet_in_enveloppe_briefstembureaus: 0,
+                    meer_stembiljetten_in_een_enveloppe_briefstembureaus: 0,
                     geen_verklaring: 0,
                     andere_verklaring: 0,
                     votes: vec![]
@@ -509,15 +525,18 @@ pub fn csv2contest(r: Box<Read>) -> Contest {
     append_row4u32!(iter, contest, geldig_volmachtbewijs, "geldig volmachtbewijs");
     append_row4u32!(iter, contest, geldige_kiezerspas, "geldige kiezerspas");
     append_row4u32!(iter, contest, toegelaten_kiezers, "toegelaten kiezers");
+    append_row4u32!(iter, contest, toegelaten_kiezers_briefstembureaus_gemeente, "toegelaten kiezers (Briefstembureaus gemeente)");
     append_row4u32!(iter, contest, geldige_stembiljetten, "geldige stembiljetten");
     append_row4u32!(iter, contest, blanco_stembiljetten, "blanco stembiljetten");
     append_row4u32!(iter, contest, ongeldige_stembiljetten, "ongeldige stembiljetten");
     append_row4u32!(iter, contest, aangetroffen_stembiljetten, "aangetroffen stembiljetten");
-    append_row4u32!(iter, contest, meer_stembiljetten_dan_toegelaten_kiezers, "meer stembiljetten dan toegelaten kiezers ");
-    append_row4u32!(iter, contest, minder_stembiljetten_dan_toegelaten_kiezers, "minder stembiljetten dan toegelaten kiezers ");
+    append_row4u32!(iter, contest, meer_stembiljetten_dan_toegelaten_kiezers, "meer stembiljetten dan toegelaten kiezers");
+    append_row4u32!(iter, contest, minder_stembiljetten_dan_toegelaten_kiezers, "minder stembiljetten dan toegelaten kiezers");
     append_row4u32!(iter, contest, kiezers_met_stembiljet_hebben_niet_gestemd, "kiezers met stembiljet hebben niet gestemd");
     append_row4u32!(iter, contest, er_zijn_te_weinig_stembiljetten_uitgereikt, "er zijn te weinig stembiljetten uitgereikt");
     append_row4u32!(iter, contest, er_zijn_te_veel_stembiljetten_uitgereikt, "er zijn te veel stembiljetten uitgereikt");
+    append_row4u32!(iter, contest, geen_stembiljet_in_enveloppe_briefstembureaus, "geen stembiljet in enveloppe (Briefstembureaus)");
+    append_row4u32!(iter, contest, meer_stembiljetten_in_een_enveloppe_briefstembureaus, "meer stembiljetten in een enveloppe (Briefstembureaus)");
     append_row4u32!(iter, contest, geen_verklaring, "geen verklaring");
     append_row4u32!(iter, contest, andere_verklaring, "andere verklaring");
 
